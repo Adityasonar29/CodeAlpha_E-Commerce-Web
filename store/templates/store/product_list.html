@@ -1,0 +1,129 @@
+{% extends 'store/base.html' %}
+
+{% block title %}All Products | EasyShop{% endblock %}
+
+{% block content %}
+<div class="grid gap-8 lg:grid-cols-[1.25fr_.8fr] items-start">
+    <section class="space-y-8">
+        <div class="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-600 p-10 text-white shadow-[0_40px_120px_-70px_rgba(30,41,59,0.8)]">
+            <span class="inline-flex rounded-full bg-white/15 px-4 py-2 text-xs uppercase tracking-[0.35em] text-slate-200">Ecommerce storefront</span>
+            <h1 class="mt-6 text-4xl font-black tracking-tight sm:text-5xl">Shop premium products, accessories, and everyday essentials.</h1>
+            <p class="mt-6 max-w-2xl text-sm leading-7 text-slate-200 sm:text-base">A modern ecommerce destination built for fast discovery, seamless checkout, and a polished shopping experience.</p>
+            <div class="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <a href="#products" class="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-slate-900/10 hover:bg-slate-100">Browse products</a>
+                <a href="{% url 'cart_detail' %}" class="rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/20">Go to cart</a>
+            </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-3xl bg-white p-6 shadow-lg border border-slate-200">
+                <h2 class="text-lg font-semibold text-slate-900">Discover curated deals</h2>
+                <p class="mt-3 text-sm leading-6 text-slate-600">Spotlight items, trending products, and fast-moving stock to help visitors shop immediately.</p>
+            </div>
+            <div class="rounded-3xl bg-white p-6 shadow-lg border border-slate-200">
+                <h2 class="text-lg font-semibold text-slate-900">Smooth checkout</h2>
+                <p class="mt-3 text-sm leading-6 text-slate-600">Your product flow, cart, and checkout pages are ready to use with the same consistent style.</p>
+            </div>
+        </div>
+    </section>
+
+    <aside class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-lg shadow-slate-900/5">
+        <div class="rounded-3xl bg-slate-950 p-6 text-white">
+            <h3 class="text-base font-semibold">Store stats</h3>
+            <div class="mt-5 grid gap-4 text-sm text-slate-300">
+                <div class="flex items-center justify-between"><span>Products online</span><strong class="text-white">{{ products|length }}</strong></div>
+                <div class="flex items-center justify-between"><span>Featured picks</span><strong class="text-white">{{ featured_count }}</strong></div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+<section id="products" class="mt-14">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-slate-500">All products</p>
+            <h2 class="mt-2 text-3xl font-bold text-slate-900">Browse everything in the catalog</h2>
+        </div>
+        <form method="GET" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <label class="sr-only" for="sort">Sort by</label>
+            <select id="sort" name="sort" class="rounded-full border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm focus:border-slate-400 focus:outline-none">
+                <option value="latest" {% if sort == 'latest' %}selected{% endif %}>Latest arrivals</option>
+                <option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: low to high</option>
+                <option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: high to low</option>
+            </select>
+            <button type="submit" class="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700">Sort</button>
+        </form>
+    </div>
+
+    <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {% for product in products %}
+        <article class="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+            {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="h-64 w-full object-cover transition duration-500 group-hover:scale-105" />
+            {% else %}
+                <div class="flex h-64 items-center justify-center bg-slate-100 text-slate-400">No Image</div>
+            {% endif %}
+            <div class="space-y-4 p-6">
+                <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
+                    {% if product.featured %}
+                    <span class="rounded-full bg-amber-100 px-3 py-1 text-amber-700">Featured</span>
+                    {% else %}
+                    <span class="rounded-full bg-slate-100 px-3 py-1">Product</span>
+                    {% endif %}
+                    <span>Stock: {{ product.stock }}</span>
+                </div>
+                <div class="flex items-center justify-between gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
+                    <span class="rounded-full bg-slate-100 px-3 py-1">{{ product.category|default:'General' }}</span>
+                    <span>{{ product.brand|default:'Brand TBD' }}</span>
+                </div>
+                <a href="{% url 'product_detail' product.id %}" class="text-xl font-semibold text-slate-900 hover:text-indigo-600">{{ product.name }}</a>
+                <div class="text-sm leading-6 text-slate-600">{{ product.description_preview|safe }}</div>
+                <div class="mt-4 flex items-center justify-between gap-3">
+                    <span class="text-2xl font-bold text-slate-900">Rs. {{ product.price }}</span>
+                    <form action="{% url 'add_to_cart' product.id %}" method="POST" class="space-y-3">
+                        {% csrf_token %}
+                        <div class="flex items-center gap-2">
+                            <button type="button" data-action="decrement" data-target="quantity-{{ product.id }}" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100">-</button>
+                            <label for="quantity-{{ product.id }}" class="sr-only">Quantity for {{ product.name }}</label>
+                            <input id="quantity-{{ product.id }}" name="quantity" type="number" min="1" max="{{ product.stock }}" value="1" class="w-16 rounded-3xl border border-slate-200 bg-slate-50 px-3 py-2 text-center text-sm text-slate-900 outline-none focus:border-slate-400" />
+                            <button type="button" data-action="increment" data-target="quantity-{{ product.id }}" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 transition hover:bg-slate-100">+</button>
+                        </div>
+                        <button type="submit" class="w-full rounded-full border border-slate-300 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">Add to cart</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+
+    {% if out_of_stock_products %}
+    <section class="mt-14 rounded-[2rem] border border-amber-200 bg-amber-50 p-8 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.3em] text-amber-700">Out of stock</p>
+                <h2 class="mt-2 text-3xl font-bold text-slate-900">Products unavailable right now</h2>
+            </div>
+            <p class="text-sm text-slate-700">These items will reappear in the catalog as soon as stock is replenished.</p>
+        </div>
+        <div class="mt-8 grid gap-4 lg:grid-cols-2">
+            {% for product in out_of_stock_products %}
+            <article class="rounded-[1.75rem] border border-amber-200 bg-white p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.35em] text-amber-700">Out of stock</p>
+                        <a href="{% url 'product_detail' product.id %}" class="mt-3 block text-xl font-semibold text-slate-900 hover:text-indigo-600">{{ product.name }}</a>
+                        <div class="mt-2 text-sm leading-6 text-slate-600">{{ product.description_preview|safe }}</div>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">Sold out</span>
+                </div>
+                <div class="mt-4 flex items-center justify-between gap-3">
+                    <span class="text-2xl font-bold text-slate-900">Rs. {{ product.price }}</span>
+                    <span class="text-sm text-slate-500">Available when restocked</span>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</section>
+{% endblock %}

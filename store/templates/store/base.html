@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EasyShop{% endblock %}</title>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at top, rgba(99, 102, 241, 0.12), transparent 40%),
+                        linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+        button,
+        input[type=submit],
+        input[type=button],
+        input[type=reset] {
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            color: #000 !important;
+        }
+        button {
+            background-color: #ffffff;
+        }
+        input,
+        textarea,
+        select {
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            color: #000 !important;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-900 antialiased">
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div class="mx-auto flex flex-wrap items-center justify-between gap-3 max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+            <a href="{% url 'home' %}" class="flex items-center gap-3 min-w-0">
+                <div class="grid h-12 w-12 place-items-center rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-700 text-white shadow-lg">
+                    <span class="text-2xl font-black">E</span>
+                </div>
+                <div class="min-w-0">
+                    <p class="truncate text-[0.65rem] uppercase tracking-[0.35em] text-slate-500">Ecommerce</p>
+                    <h1 class="text-base font-semibold text-slate-900">EasyShop</h1>
+                </div>
+            </a>
+            <nav class="hidden items-center gap-4 text-sm font-semibold text-slate-700 md:flex">
+                <a href="{% url 'home' %}" class="rounded-full px-3 py-2 transition hover:bg-slate-100 hover:text-slate-900">Home</a>
+                <a href="{% url 'product_list' %}" class="rounded-full px-3 py-2 transition hover:bg-slate-100 hover:text-slate-900">Products</a>
+                <a href="{% url 'cart_detail' %}" class="rounded-full px-3 py-2 transition hover:bg-slate-100 hover:text-slate-900">Cart</a>
+                {% if user.is_authenticated %}
+                {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'admin_dashboard' %}" class="rounded-full px-3 py-2 transition hover:bg-slate-100 hover:text-slate-900">Dashboard</a>
+                {% else %}
+                <a href="{% url 'user_dashboard' %}" class="rounded-full px-3 py-2 transition hover:bg-slate-100 hover:text-slate-900">Dashboard</a>
+                {% endif %}
+                {% endif %}
+            </nav>
+            <div class="hidden items-center gap-3 md:flex">
+                {% if user.is_authenticated %}
+                    <span class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">Welcome, {{ user.username }}</span>
+                    <form action="{% url 'logout' %}" method="POST" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'register' %}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">Register</a>
+                    <a href="{% url 'login' %}" class="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">Login</a>
+                {% endif %}
+            </div>
+            <button id="mobile-menu-button" class="ml-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-sm transition hover:bg-slate-100 md:hidden" aria-expanded="false" aria-label="Open menu">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <div id="mobile-menu" class="fixed inset-x-0 top-0 z-50 hidden bg-white p-5 shadow-2xl md:hidden">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="grid h-11 w-11 place-items-center rounded-3xl bg-gradient-to-br from-sky-500 to-indigo-700 text-white shadow-lg">
+                            <span class="text-xl font-black">E</span>
+                        </div>
+                        <div>
+                            <p class="text-[0.65rem] uppercase tracking-[0.35em] text-slate-400">EasyShop</p>
+                            <h2 class="text-base font-semibold text-slate-900">Menu</h2>
+                        </div>
+                    </div>
+                    <button id="mobile-menu-close" class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200" aria-label="Close menu">
+                        <svg class="h-4.5 w-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="mt-5 grid gap-2">
+                    {% if user.is_authenticated %}
+                    <div class="space-y-3">
+                        <p class="font-semibold text-slate-900">Welcome, {{ user.username }}</p>
+                    </div>
+                    {% else %}
+                    {% endif %}
+                    <a href="{% url 'home' %}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100">Home</a>
+                    <a href="{% url 'product_list' %}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100">Products</a>
+                    <a href="{% url 'cart_detail' %}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100">Cart</a>
+                    {% if user.is_authenticated %}
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'admin_dashboard' %}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100">Dashboard</a>
+                    {% else %}
+                    <a href="{% url 'user_dashboard' %}" class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100">Dashboard</a>
+                    {% endif %}
+                    {% endif %}
+                </div>
+                <div class="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                    {% if user.is_authenticated %}
+                    <div class="space-y-3">
+                        <form action="{% url 'logout' %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200">Logout</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="toast-root" class="fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-3 px-4 pointer-events-none">
+        {% if messages %}
+        <div class="max-w-xl w-full space-y-3">
+            {% for message in messages %}
+            <div class="toast-message w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-xl">
+                <div class="flex items-start gap-3">
+                    <div class="mt-1 h-2 w-2 rounded-full bg-brand-500"></div>
+                    <p class="text-sm leading-6 text-slate-700">{{ message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <main class="mx-auto max-w-7xl px-4 py-10 pb-28 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="mx-auto max-w-7xl px-4 py-10 text-slate-600 sm:px-6 lg:px-8">
+        <div class="rounded-[2rem] border border-slate-200 bg-slate-950 px-6 py-8 text-white shadow-lg shadow-slate-900/10">
+            <div class="grid gap-6 md:grid-cols-3">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.35em] text-slate-400">About the store</p>
+                    <p class="mt-4 text-sm leading-6 text-slate-300">Dummy ecommerce footer content with contact, support, and business information for customers.</p>
+                </div>
+                <div>
+                    <p class="text-sm uppercase tracking-[0.35em] text-slate-400">Support</p>
+                    <ul class="mt-4 space-y-3 text-sm text-slate-300">
+                        <li><a href="{% url 'home' %}" class="transition hover:text-white">Help center</a></li>
+                        <li><a href="{% url 'cart_detail' %}" class="transition hover:text-white">Orders</a></li>
+                        <li><a href="{% if user.is_staff or user.is_superuser %}{% url 'admin_dashboard' %}{% else %}{% url 'user_dashboard' %}{% endif %}" class="transition hover:text-white">Shipping info</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <p class="text-sm uppercase tracking-[0.35em] text-slate-400">Contact</p>
+                    <p class="mt-4 text-sm leading-6 text-slate-300">support@shop.example</p>
+                    <p class="mt-2 text-sm leading-6 text-slate-300">+1 (555) 123-4567</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <footer class="fixed bottom-4 right-4 z-40 rounded-full border border-slate-200 bg-white/95 px-5 py-3 text-sm text-slate-500 shadow-lg backdrop-blur-sm">
+        <div class="flex flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-4">
+            <span>© {% now "Y" %} EasyShop</span>
+            <span class="hidden sm:inline">Built for a polished ecommerce experience.</span>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const messages = document.querySelectorAll('.toast-message');
+            if (messages.length) {
+                messages.forEach((message) => {
+                    setTimeout(() => {
+                        message.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateY(-12px)';
+                        setTimeout(() => {
+                            message.remove();
+                        }, 500);
+                    }, 3500);
+                });
+            }
+
+            const toastRoot = document.getElementById('toast-root');
+            const showToast = (text) => {
+                if (!toastRoot) return;
+                const toast = document.createElement('div');
+                toast.className = 'toast-message w-full max-w-xl overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-xl';
+                toast.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="mt-1 h-2 w-2 rounded-full bg-brand-500"></div>
+                        <p class="text-sm leading-6 text-slate-700">${text}</p>
+                    </div>
+                `;
+                toastRoot.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-12px)';
+                    setTimeout(() => toast.remove(), 500);
+                }, 3500);
+            };
+
+            document.querySelectorAll('[data-action]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-target');
+                    const action = button.getAttribute('data-action');
+                    const input = document.getElementById(targetId);
+                    if (!input) return;
+                    let value = parseInt(input.value, 10) || 1;
+                    const max = parseInt(input.max, 10);
+
+                    if (action === 'increment') {
+                        if (!isNaN(max) && value >= max) {
+                            showToast('You cannot order more — stock is empty or limit reached.');
+                            return;
+                        }
+                        value += 1;
+                    } else if (action === 'decrement') {
+                        value = Math.max(1, value - 1);
+                    }
+
+                    if (!isNaN(max)) {
+                        value = Math.min(value, max);
+                    }
+                    input.value = value;
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
+
+            if (mobileMenuButton && mobileMenu && mobileMenuClose) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+                mobileMenuClose.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

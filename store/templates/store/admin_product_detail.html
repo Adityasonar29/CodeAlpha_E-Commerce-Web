@@ -1,0 +1,40 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Product Details | EasyShop{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <section class="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-700 p-8 text-white shadow-[0_30px_80px_-30px_rgba(15,23,42,0.85)]">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+                <p class="text-sm uppercase tracking-[0.35em] text-slate-300">Product management</p>
+                <h1 class="mt-3 text-3xl font-bold sm:text-4xl">{{ product.name }}</h1>
+                <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-300">Review product details and manage inventory from one place.</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <a href="{% url 'admin_products' %}" class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20">Back to products</a>
+                <a href="{% url 'admin_product_update' product.id %}" class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/20">Edit product</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-lg">
+        <div class="grid gap-6 lg:grid-cols-[0.75fr_0.25fr]">
+            <div>
+                <p class="text-sm uppercase tracking-[0.35em] text-slate-500">Description</p>
+                <div class="mt-4 prose max-w-none text-slate-700">{{ product.description_html|safe }}</div>
+            </div>
+            <div class="rounded-[1.75rem] bg-slate-50 p-6">
+                <p class="text-sm uppercase tracking-[0.35em] text-slate-500">Details</p>
+                <ul class="mt-4 space-y-3 text-sm text-slate-700">
+                    <li><strong class="text-slate-900">Price:</strong> Rs. {{ product.price }}</li>
+                    <li><strong class="text-slate-900">Stock:</strong> {{ product.stock }}</li>
+                    <li><strong class="text-slate-900">Brand:</strong> {{ product.brand|default:'Brand TBD' }}</li>
+                    <li><strong class="text-slate-900">Category:</strong> {{ product.category|default:'General' }}</li>
+                    <li><strong class="text-slate-900">Featured:</strong> {{ product.featured|yesno:'Yes,No' }}</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

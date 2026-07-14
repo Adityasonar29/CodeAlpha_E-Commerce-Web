@@ -1,0 +1,17 @@
+class Cart:
+    def __init__(self, request):
+        self.session = request.session
+        cart = self.session.get('cart')
+        if not cart:
+            cart = self.session['cart'] = {}
+        self.cart = cart
+
+    def add(self, product_id, quantity=1):
+        p_id = str(product_id)
+        if p_id not in self.cart:
+            self.cart[p_id] = {'quantity': 0}
+        self.cart[p_id]['quantity'] += quantity
+        self.save()
+
+    def save(self):
+        self.session.modified = True
